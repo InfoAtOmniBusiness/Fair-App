@@ -1,0 +1,17 @@
+{
+  "name": "fair-mobile-demo",
+  "version": "1.0.0",
+  "main": "expo-router/entry",
+  "scripts": { "start": "expo start", "ios": "expo run:ios" },
+  "dependencies": {
+    "expo": "*",
+    "expo-camera": "*",
+    "expo-router": "*",
+    "expo-status-bar": "*",
+    "react": "*",
+    "react-native": "*",
+    "react-native-safe-area-context": "*",
+    "react-native-screens": "*"
+  },
+  "comment": "Run `npx expo install` to pin every dependency to your installed SDK's compatible versions."
+}

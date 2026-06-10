@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "Fair",
+    "slug": "fair",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "fair",
+    "newArchEnabled": true,
+    "ios": {
+      "bundleIdentifier": "com.fair.app",
+      "buildNumber": "1",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Fair uses the camera to scan product barcodes so it can look up and compare prices.",
+        "NSLocationWhenInUseUsageDescription": "Fair uses your approximate location to show prices at stores near you. This is optional.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "plugins": ["expo-router", "expo-camera"]
+  }
+}
