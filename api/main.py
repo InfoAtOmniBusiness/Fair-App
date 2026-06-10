@@ -283,9 +283,16 @@ def health(db: Session = Depends(get_db)):
             "prices": db.query(func.count(Price.id)).scalar()}
 
 
+_DEMO_HTML = os.path.join(os.path.dirname(__file__), "static", "demo.html")
+
+
+@app.get("/")
 @app.get("/demo")
 def demo_page():
-    return FileResponse(os.path.join(os.path.dirname(__file__), "static", "demo.html"))
+    # Live-mode landing page (auto-detects the API via /api/health). Served from
+    # the function because Vercel routes all paths here; root static files at the
+    # repo root are not part of the Python function bundle.
+    return FileResponse(_DEMO_HTML)
 
 
 init_db()
