@@ -2,10 +2,12 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator, FlatList, Image, Linking, Pressable, StyleSheet, Text,
-  TextInput, View,
+  ActivityIndicator, Alert, FlatList, Image, Linking, Pressable, StyleSheet,
+  Text, TextInput, View,
 } from "react-native";
-import { Comparison, getComparison } from "../../lib/api";
+import {
+  addWatch, AuthRequiredError, Comparison, getComparison, submitPrice,
+} from "../../lib/api";
 
 const VERDICT = {
   green:   { label: "Fair price",      color: "#0B8A5C" },
@@ -20,6 +22,58 @@ export default function ProductScreen() {
   const [data, setData] = useState<Comparison | null>(null);
   const [seen, setSeen] = useState("");
   const [state, setState] = useState<"loading" | "ok" | "notfound" | "error">("loading");
+  const [watched, setWatched] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [storeName, setStoreName] = useState("");
+  const [shared, setShared] = useState(false);
+  const [busy, setBusy] = useState<"" | "watch" | "share">("");
+
+  // Save actions need a session; scanning/comparison stay public.
+  const requireAuth = useCallback((e: unknown): boolean => {
+    if (e instanceof AuthRequiredError) {
+      router.push({ pathname: "/login", params: { next: `/product/${upc}` } });
+      return true;
+    }
+    return false;
+  }, [router, upc]);
+
+  const watch = async () => {
+    setBusy("watch");
+    try {
+      await addWatch(String(upc), parseFloat(seen) || undefined);
+      setWatched(true);
+    } catch (e) {
+      if (!requireAuth(e)) {
+        const msg = e instanceof Error ? e.message : "Try again.";
+        if (/already/i.test(msg)) setWatched(true);
+        else Alert.alert("Couldn't add to watchlist", msg);
+      }
+    } finally {
+      setBusy("");
+    }
+  };
+
+  const sharePrice = async () => {
+    const price = parseFloat(seen);
+    if (!price || !storeName.trim()) {
+      Alert.alert("Almost there",
+        "Enter the shelf price above and the store name to share it.");
+      return;
+    }
+    setBusy("share");
+    try {
+      await submitPrice(String(upc), storeName.trim(), price);
+      setShared(true);
+      setShareOpen(false);
+    } catch (e) {
+      if (!requireAuth(e)) {
+        Alert.alert("Couldn't submit price",
+          e instanceof Error ? e.message : "Try again.");
+      }
+    } finally {
+      setBusy("");
+    }
+  };
 
   const load = useCallback(async (priceSeen?: number) => {
     setState("loading");
@@ -93,6 +147,50 @@ export default function ProductScreen() {
               <Text style={s.btnT}>Check</Text>
             </Pressable>
           </View>
+
+          <View style={s.actions}>
+            <Pressable
+              style={[s.action, watched && s.actionDone]}
+              onPress={watch}
+              disabled={busy !== "" || watched}
+            >
+              {busy === "watch"
+                ? <ActivityIndicator color="#06614A" />
+                : <Text style={s.actionT}>{watched ? "✓ Watching" : "♡ Watch"}</Text>}
+            </Pressable>
+            <Pressable
+              style={[s.action, shared && s.actionDone]}
+              onPress={() => (shared ? null : setShareOpen(!shareOpen))}
+              disabled={busy !== ""}
+            >
+              <Text style={s.actionT}>
+                {shared ? "✓ Price shared" : "Share shelf price"}
+              </Text>
+            </Pressable>
+          </View>
+
+          {shareOpen && !shared ? (
+            <View style={s.shareBox}>
+              <Text style={s.shareHint}>
+                Sharing the price you see helps everyone catch overpricing.
+              </Text>
+              <View style={s.seenRow}>
+                <TextInput
+                  style={s.seenInput}
+                  value={storeName}
+                  onChangeText={setStoreName}
+                  placeholder="Store name, e.g. Safeway — Downtown"
+                  placeholderTextColor="#8FA39B"
+                />
+                <Pressable style={s.btnSm} onPress={sharePrice} disabled={busy !== ""}>
+                  {busy === "share"
+                    ? <ActivityIndicator color="#fff" />
+                    : <Text style={s.btnT}>Submit</Text>}
+                </Pressable>
+              </View>
+            </View>
+          ) : null}
+
           <Text style={s.section}>Where to buy</Text>
         </View>
       }
@@ -136,6 +234,14 @@ const s = StyleSheet.create({
   seenInput: { flex: 1, backgroundColor: "#fff", borderWidth: 1.5,
                borderColor: "#E4DCCB", borderRadius: 12, paddingHorizontal: 13,
                height: 46, fontSize: 15, color: "#1C2B26" },
+  actions: { flexDirection: "row", gap: 8, marginTop: 10 },
+  action: { flex: 1, backgroundColor: "#EAF6EF", borderRadius: 12,
+            paddingVertical: 12, alignItems: "center" },
+  actionDone: { backgroundColor: "#fff", borderWidth: 1, borderColor: "#0B8A5C" },
+  actionT: { color: "#06614A", fontWeight: "800", fontSize: 14 },
+  shareBox: { marginTop: 10, backgroundColor: "#fff", borderWidth: 1,
+              borderColor: "#E4DCCB", borderRadius: 14, padding: 12 },
+  shareHint: { fontSize: 12.5, color: "#6E7B74", marginBottom: 8 },
   section: { marginTop: 22, marginBottom: 8, fontSize: 12, letterSpacing: 1,
              textTransform: "uppercase", color: "#6E7B74", fontWeight: "700" },
   offer: { flexDirection: "row", alignItems: "center", gap: 10,

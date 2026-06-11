@@ -2,11 +2,18 @@
   "name": "fair-mobile-demo",
   "version": "1.0.0",
   "main": "expo-router/entry",
-  "scripts": { "start": "expo start", "ios": "expo run:ios" },
+  "scripts": {
+    "start": "expo start",
+    "ios": "expo run:ios",
+    "typecheck": "tsc --noEmit",
+    "preflight:local": "node scripts/check-release-env.mjs",
+    "preflight:release": "node scripts/check-release-env.mjs --release && tsc --noEmit"
+  },
   "dependencies": {
     "expo": "*",
     "expo-camera": "*",
     "expo-router": "*",
+    "expo-secure-store": "*",
     "expo-status-bar": "*",
     "react": "*",
     "react-native": "*",

@@ -52,6 +52,14 @@ export default function ScanScreen() {
           <View style={s.frame} />
           <Text style={s.hint}>Point at a product barcode</Text>
         </View>
+        <View style={s.topRight}>
+          <Pressable style={s.chip} onPress={() => router.push("/watchlist")}>
+            <Text style={s.chipT}>♡ Watchlist</Text>
+          </Pressable>
+          <Pressable style={s.chip} onPress={() => router.push("/account")}>
+            <Text style={s.chipT}>Account</Text>
+          </Pressable>
+        </View>
       </CameraView>
 
       <View style={s.manualBar}>
@@ -85,6 +93,12 @@ const s = StyleSheet.create({
   frame: { width: 270, height: 160, borderRadius: 18, borderWidth: 3,
            borderColor: "#34D399" },
   hint: { color: "#D9EFE4", marginTop: 16, fontSize: 14 },
+  topRight: { position: "absolute", top: 58, right: 14, flexDirection: "row",
+              gap: 8 },
+  chip: { backgroundColor: "rgba(6,35,27,0.72)", borderRadius: 999,
+          paddingVertical: 8, paddingHorizontal: 13, borderWidth: 1,
+          borderColor: "rgba(52,211,153,0.45)" },
+  chipT: { color: "#D9EFE4", fontWeight: "700", fontSize: 13 },
   manualBar: { flexDirection: "row", gap: 8, padding: 14,
                backgroundColor: "#06231B" },
   input: { flex: 1, backgroundColor: "#0E3A2D", color: "#fff",

@@ -28,3 +28,4 @@ android/
 # Exception: pre-seeded demo database ships with the repo so Vercel deploys
 # work instantly without depending on OpenFoodFacts at build time
 !api/fair_demo.db
+.vercel
