@@ -5,6 +5,7 @@
 import * as SecureStore from "expo-secure-store";
 import {
   createContext, useCallback, useContext, useEffect, useMemo, useState,
+  type ReactNode,
 } from "react";
 import {
   apiDeleteAccount, apiLogin, apiMe, apiRegister, Me, setAuthToken,
@@ -23,7 +24,7 @@ type AuthState = {
 
 const AuthContext = createContext<AuthState | null>(null);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<Me | null>(null);
   const [loading, setLoading] = useState(true);
 
